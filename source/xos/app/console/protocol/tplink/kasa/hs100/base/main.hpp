@@ -56,7 +56,10 @@ public:
     : run_(0), request_(0),
       power_on_request_("{\"system\":{\"set_relay_state\":{\"state\":1}}}"), 
       power_off_request_("{\"system\":{\"set_relay_state\":{\"state\":0}}}"),
-      power_request_("{\"system\":{\"get_sysinfo\":null}}") {
+      power_request_("{\"system\":{\"get_sysinfo\":null}}"),
+      power_on_response_("{\"system\":{\"set_relay_state\":{\"err_code\":0}}}"), 
+      power_off_response_(power_on_response_),
+      power_response_(power_request_) {
     }
     virtual ~maint() {
     }
@@ -169,6 +172,93 @@ protected:
         return err;
     }
 
+    /// response
+    string_t& (derives::*response_)() const;
+    virtual string_t& response() const {
+        if ((response_)) {
+            return (this->*response_)();
+        }
+        return power_response();
+    }
+
+    /// ...set_to_power_on_response
+    virtual int set_to_power_on_response(int argc, char_t** argv, char_t** env) {
+        int err = 0;
+        response_ = &derives::power_on_response;
+        return err;
+    }
+    virtual int before_set_to_power_on_response(int argc, char_t** argv, char_t** env) {
+        int err = 0;
+        return err;
+    }
+    virtual int after_set_to_power_on_response(int argc, char_t** argv, char_t** env) {
+        int err = 0;
+        return err;
+    }
+    virtual int all_set_to_power_on_response(int argc, char_t** argv, char_t** env) {
+        int err = 0;
+        if (!(err = before_set_to_power_on_response(argc, argv, env))) {
+            int err2 = 0;
+            err = set_to_power_on_response(argc, argv, env);
+            if ((err2 = after_set_to_power_on_response(argc, argv, env))) {
+                if (!(err)) err = err2;
+            }
+        }
+        return err;
+    }
+
+    /// ...set_to_power_off_response
+    virtual int set_to_power_off_response(int argc, char_t** argv, char_t** env) {
+        int err = 0;
+        response_ = &derives::power_off_response;
+        return err;
+    }
+    virtual int before_set_to_power_off_response(int argc, char_t** argv, char_t** env) {
+        int err = 0;
+        return err;
+    }
+    virtual int after_set_to_power_off_response(int argc, char_t** argv, char_t** env) {
+        int err = 0;
+        return err;
+    }
+    virtual int all_set_to_power_off_response(int argc, char_t** argv, char_t** env) {
+        int err = 0;
+        if (!(err = before_set_to_power_off_response(argc, argv, env))) {
+            int err2 = 0;
+            err = set_to_power_off_response(argc, argv, env);
+            if ((err2 = after_set_to_power_off_response(argc, argv, env))) {
+                if (!(err)) err = err2;
+            }
+        }
+        return err;
+    }
+
+    /// ...set_to_power_response
+    virtual int set_to_power_response(int argc, char_t** argv, char_t** env) {
+        int err = 0;
+        response_ = &derives::power_response;
+        return err;
+    }
+    virtual int before_set_to_power_response(int argc, char_t** argv, char_t** env) {
+        int err = 0;
+        return err;
+    }
+    virtual int after_set_to_power_response(int argc, char_t** argv, char_t** env) {
+        int err = 0;
+        return err;
+    }
+    virtual int all_set_to_power_response(int argc, char_t** argv, char_t** env) {
+        int err = 0;
+        if (!(err = before_set_to_power_response(argc, argv, env))) {
+            int err2 = 0;
+            err = set_to_power_response(argc, argv, env);
+            if ((err2 = after_set_to_power_response(argc, argv, env))) {
+                if (!(err)) err = err2;
+            }
+        }
+        return err;
+    }
+
     /// decrypt / encrypt text
     virtual string_t& decrypt_text(const string_t& r) {
         string_t& plain_text = this->plain_text();
@@ -228,6 +318,17 @@ protected:
         return (string_t&)power_request_;
     }
 
+    /// power on / off response
+    virtual string_t& power_on_response() const {
+        return (string_t&)power_on_response_;
+    }
+    virtual string_t& power_off_response() const {
+        return (string_t&)power_off_response_;
+    }
+    virtual string_t& power_response() const {
+        return (string_t&)power_response_;
+    }
+
     /// cipher / plain text
     virtual string_t& cipher_text() const {
         return (string_t&)cipher_text_;
@@ -238,6 +339,7 @@ protected:
 
 protected:
     string_t power_on_request_, power_off_request_, power_request_, 
+             power_on_response_, power_off_response_, power_response_,
              cipher_text_, plain_text_;
 }; /// class maint
 typedef maint<> main;
